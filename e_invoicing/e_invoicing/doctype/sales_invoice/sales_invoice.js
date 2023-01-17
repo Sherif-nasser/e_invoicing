@@ -1,4 +1,26 @@
 frappe.ui.form.on("Sales Invoice", {
+  
+  onload(frm){
+    hide(frm);
+  },
+  customer:function(frm){
+    var customer = frappe.db.get_doc("Customer", frm.doc.customer)
+    if(frm.doc.docstatus != 1){
+      customer.then((data)=>{
+        console.log(data);
+        if(frm.doc.tax_invoice == 1){
+          frm.doc.receiver_postal_code = data.postal_code;
+          frm.doc.receiver_floor = data.floor;
+          frm.doc.receiver_room = data.room;
+          frm.doc.receiver_land_mark = data.landmark;
+          frm.refresh_field("receiver_details")
+        }else{
+          console.log("normal invoice");
+        }
+      });
+      
+    }
+  },
   refresh(frm) {
     // your code here
     // if (frm.doc.items) {
@@ -44,6 +66,15 @@ frappe.ui.form.on("Sales Invoice", {
       // }
     }
   },
+  
+  tax_invoice: function(frm){
+    if(frm.doc.tax_invoice == 1){
+      show(frm);
+    }else{
+      hide(frm);
+    }
+  },
+
   submit_invoice_status: function (frm, status) {
     frappe.call({
       method:
@@ -199,3 +230,19 @@ frappe.ui.form.on("Sales Invoice Item", {
     frm.events.set_total(frm, cdt, cdn);
   },
 });
+
+
+// Hides tax invoice fields
+function hide(frm){
+  frm.set_df_property("issuer_address","hidden",1);
+  frm.set_df_property("receiver_details","hidden",1);
+  frm.set_df_property("activity_type","hidden",1);
+}
+// sales_invoice.json => mandatory_depends_on
+//"eval:(doc.is_pos ==false)" to "eval:(doc.tax_invoice ==true)"
+// shows tax invoice fields when tax invoice is creating
+function show(frm){
+  frm.set_df_property("issuer_address","hidden",0);
+  frm.set_df_property("receiver_details","hidden",0);
+  frm.set_df_property("activity_type","hidden",0);
+}
