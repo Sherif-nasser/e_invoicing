@@ -1,7 +1,19 @@
 frappe.ui.form.on("Sales Invoice", {
   
   onload(frm){
-    hide(frm);
+    if(frm.doc.tax_invoice == 1){
+      show(frm);
+    }else{
+      hide(frm);
+    }
+  },
+  on_submit:function(frm){
+    console.log("sherif");
+    try{
+    show(frm);
+    }catch(e){
+      console.log(e.message);
+    }
   },
   customer:function(frm){
     var customer = frappe.db.get_doc("Customer", frm.doc.customer)
